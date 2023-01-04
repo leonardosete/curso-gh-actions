@@ -12,20 +12,20 @@ jobs:
       SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
       SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
     steps:
-      - name: Checkout Actions
+      - name: STEP 1 - CHECKOUT ACTIONS
         uses: actions/checkout@v3
 
-      - name: Use NodeJs
+      - name: STEP 2 - USE NODEJS
         uses: actions/setup-node@v3
         with:
           node-version: "latest"
 
-      - name: Get npm cache directory
+      - name: STEP 3 - GET NPM CACHE DIRECTORY
         id: npm-cache-dir
         shell: bash
         run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT} ## nova forma de usar set-output
 
-      - name: Cache Node Modules
+      - name: STEP 4 - CACHE NODE MODULES
         uses: actions/cache@v3
         id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
         with:
@@ -34,35 +34,35 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Install NodeJs Dependencies
+      - name: STEP 5 - INSTALL NODEJS DEPENDENCIES
         run: npm ci ## similar to npm install
 
-      - name: Check Code Formatting
+      - name: STEP 6 - CHECK CODE FORMATTING
         run: npm run format:check
 
-      - name: Run Tests
+      - name: STEP 7 - RUN TESTS
         run: npm test -- --coverage
         env:
           CI: true ## com essa variável, não fica interativo
 
-      - name: Upload Test Coverage
+      - name: STEP 8 - UPLOAD TEST COVERAGE
         uses: actions/upload-artifact@v3
         with:
           name: code-coverage
           path: coverage
 
-      - name: Build Project
+      - name: STEP 9 - BUILD PROJECT
         if: github.event_name == 'push'
         run: npm run build
 
-      - name: Upload Build Coverage
+      - name: STEP 10 - UPLOAD BUILD COVERAGE
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v3
         with:
           name: build
           path: build
 
-      - name: Zip Assets
+      - name: STEP 11 - ZIP ASSETS
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
           zip -r build.zip ./build
@@ -72,23 +72,23 @@ jobs:
       #   if: github.event_name == 'push'
       #   run: npm install -g surge
 
-      - name: Create a Release
+      - name: STEP 12 - CREATE A RELEASE
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.CUSTOM_TOKEN_SLACK }}
 
-      - name: Deploy to Staging
+      - name: STEP 13 - DEPLOY TO STAGING
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         run: npx surge --project ./build --domain eager-edge.surge.sh ## instala e executa o surge numa única linha de comando
         # run: surge ## caso estivesse usando o step "Install Surge"
 
-      - name: Deploy to Production
+      - name: STEP 14 - DEPLOY TO PRODUCTION
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: npx surge --project ./build --domain ubiquitous-library.surge.sh ## instala e executa o surge numa única linha de comando
         # run: surge ## caso estivesse usando o step "Install Surge"
 
-      - name: Upload Coverage Reports
+      - name: STEP 15 - UPLOAD COVERAGE REPORTS
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: npx codecov
         env:
