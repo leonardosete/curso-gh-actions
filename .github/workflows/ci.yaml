@@ -87,3 +87,9 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: npx surge --project ./build --domain ubiquitous-library.surge.sh ## instala e executa o surge numa única linha de comando
         # run: surge ## caso estivesse usando o step "Install Surge"
+
+      - name: Upload Coverage Reports
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: npx codecov
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
