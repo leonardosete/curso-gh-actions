@@ -1,0 +1,38 @@
+on: push
+jobs:
+  testing-action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: STEP 1 - CHECKOUT ACTIONS
+        uses: actions/checkout@v3
+
+      - name: STEP 2 - SEND A SLACK MESSAGE
+        uses: ./.github/actions/slack
+        with:
+          slack_webhook: ${{ secrets.SLACK_WEBHOOK }}
+          message: Hello Slack
+
+      - name: STEP 3 - OPENS AN ISSUE
+        uses: alialaa/open-issue@v1
+        id: issue
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: Title
+          body: Body
+          assignees: |
+            leonardosete
+
+      - name: STEP 4 - SHOWS THE OPENED ISSUE
+        run: |
+          echo ${{ steps.issue.outputs.issue }}
+
+      - name: STEP 5 - HELLO WORLD DOCKER
+        uses: ./.github/actions/hello-docker
+        id: hello
+        with:
+          who-to-greet: "World"
+      
+      - name: STEP 6 - HELLO TIME
+        run: |
+          echo "Time: ${{ steps.hello.outputs.time }}"
+          echo $HELLO
